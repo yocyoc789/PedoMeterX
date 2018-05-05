@@ -14,11 +14,19 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 
 public class MainActivity extends AppCompatActivity  {
     static int numSteps=0;
     static int stepz;
     android.support.v4.app.Fragment selectedFragment=null;
+    DBclass database;
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
 
@@ -52,10 +60,25 @@ public class MainActivity extends AppCompatActivity  {
 
         getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,new HomeFragment()).commit();
 
-
     }
 
     public void sa(View v){
 
+    }
+    public static String getdatetom(){
+        GregorianCalendar gc = new GregorianCalendar();
+        DateFormat dateFormat = new SimpleDateFormat("dd-MMM-yyyy");
+        gc.add(Calendar.DATE, 1);
+        Date tomorrow = gc.getTime();
+        String datet = dateFormat.format(tomorrow);
+        return datet;
+    }
+    public static String getdatetod(){
+        GregorianCalendar gc = new GregorianCalendar();
+        DateFormat dateFormat = new SimpleDateFormat("dd-MMM-yyyy");
+        gc.add(Calendar.DATE, 0);
+        Date tomorrow = gc.getTime();
+        String datet = dateFormat.format(tomorrow);
+        return datet;
     }
 }

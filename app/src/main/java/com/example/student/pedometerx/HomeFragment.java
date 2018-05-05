@@ -14,31 +14,33 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import org.eazegraph.lib.charts.PieChart;
 import org.eazegraph.lib.models.PieModel;
 
+import java.util.ArrayList;
+
 public class HomeFragment extends Fragment implements SensorEventListener, StepListener{
 
     TextView textView,TvSteps;
-    Button btn_stop,btn_Start;
+    Button btnplaypause;
     boolean running = true;
     private StepDetector simpleStepDetector;
     private SensorManager sensorManager;
     private Sensor accel;
     private static final String TEXT_NUM_STEPS = "Number of Steps: ";
     private PieChart mPieChart;
-
+    public DBclass db;
     @Nullable
 
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         //return inflater.inflate(R.layout.fragment_home,container,false);
         View v = inflater.inflate(R.layout.fragment_home, container, false);
-
+        db = new DBclass(getActivity());
         TvSteps=(TextView)v.findViewById(R.id.tv_steps);
-        btn_stop=(Button)v.findViewById(R.id.btn_stop);
-        btn_Start=(Button)v.findViewById(R.id.btn_start);
+        btnplaypause= (Button)v.findViewById(R.id.btnplaypause);
         TvSteps.setText(""+MainActivity.numSteps);
         mPieChart = (PieChart) v.findViewById(R.id.piechart);
 
@@ -53,22 +55,40 @@ public class HomeFragment extends Fragment implements SensorEventListener, StepL
 
 
         //when buttons are clicked
-        btn_Start.setOnClickListener(new View.OnClickListener() {
+        btnplaypause.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                getActivity().startService(new Intent(getActivity(), MyService.class));
-                running = true;
-                sensorManager.registerListener(HomeFragment.this, accel, SensorManager.SENSOR_DELAY_FASTEST);
-                 }
-        });
-        btn_stop.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                running = false;
-                getActivity().stopService(new Intent(getActivity(), MyService.class));
-                //sensorManager.unregisterListener(HomeFragment.this);
+                String status;
+
+                ArrayList<dailyrecord> dr = db.selectDailyrecords();
+                if (dr.size() == 0){
+                    db.adddailyrecord(MainActivity.getdatetom(),0,0,0.0,0.0,0.0,"pause");
+                }
+                status = dr.get(dr.size()-1).status;
+                if (status.equals("play")){
+                    btnplaypause.setBackground(getActivity().getResources().getDrawable(R.drawable.ic_play_arrow_black_24dp));
+                    getActivity().stopService(new Intent(getActivity(), MyService.class));
+                    db.updatestatus("pause");
+                }
+                else{
+                    btnplaypause.setBackground(getActivity().getResources().getDrawable(R.drawable.ic_pause_black_24dp));
+                    getActivity().startService(new Intent(getActivity(), MyService.class));
+                    running = true;
+                    sensorManager.registerListener(HomeFragment.this, accel, SensorManager.SENSOR_DELAY_FASTEST);
+                    db.updatestatus("play");
+                }
+
+
             }
         });
+//        btn_stop.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                running = false;
+//                getActivity().stopService(new Intent(getActivity(), MyService.class));
+//                //sensorManager.unregisterListener(HomeFragment.this);
+//            }
+//        });
         return v;
 
 

@@ -20,6 +20,10 @@ android {
 repositories{
     maven { url "https://jitpack.io" }
 }
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])

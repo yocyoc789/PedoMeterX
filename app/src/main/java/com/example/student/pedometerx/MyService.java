@@ -25,6 +25,7 @@ import android.text.SpannableString;
 import android.text.style.StyleSpan;
 import android.util.Log;
 
+import java.util.ArrayList;
 import java.util.Locale;
 
 public class MyService extends Service implements SensorEventListener, StepListener {
@@ -36,6 +37,7 @@ public class MyService extends Service implements SensorEventListener, StepListe
     private MediaPlayer player;
     private Notification.Builder builder;
     private Notification notification;
+    private DBclass db;
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
@@ -53,6 +55,7 @@ public class MyService extends Service implements SensorEventListener, StepListe
         player = MediaPlayer.create(this, Settings.System.DEFAULT_RINGTONE_URI);
         player.setLooping(true);
 
+        db = new DBclass(this);
         return START_STICKY;
     }
 
@@ -109,5 +112,19 @@ public class MyService extends Service implements SensorEventListener, StepListe
         notificationManager =(NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(1,notification);
     }
+    public void updatedatabase(){
 
+        ArrayList<dailyrecord> dr = db.selectDailyrecords();
+        if(dr.size() == 0){
+
+        }
+        else if (dr.get(dr.size()).dates.equals(MainActivity.getdatetom())){
+            addnew();
+        }
+
+    }
+
+    public void addnew(){
+        db.adddailyrecord(MainActivity.getdatetom(),0,0,0.0,0.0,0.0,"paused");
+    }
 }
