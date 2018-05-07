@@ -16,23 +16,26 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.eazegraph.lib.charts.PieChart;
 import org.eazegraph.lib.models.PieModel;
 
 import java.util.ArrayList;
 
-public class HomeFragment extends Fragment implements SensorEventListener, StepListener{
+public class HomeFragment extends Fragment{
 
-    TextView textView,TvSteps;
+    static TextView textView,TvSteps;
     Button btnplaypause;
     boolean running = true;
     private StepDetector simpleStepDetector;
     private SensorManager sensorManager;
     private Sensor accel;
     private static final String TEXT_NUM_STEPS = "Number of Steps: ";
-    private PieChart mPieChart;
+    static PieChart mPieChart;
     public DBclass db;
+    public static String curstatus="";
+
     @Nullable
 
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -53,19 +56,29 @@ public class HomeFragment extends Fragment implements SensorEventListener, StepL
 
         mPieChart.startAnimation();
 
+        ArrayList<dailyrecord> dr = db.selectDailyrecords();
+        if (dr.size() == 0){
+            db.adddailyrecord(MainActivity.getdatetom(),0,0,0.0,0.0,0.0,"pause");
+        }
+        curstatus = dr.get(dr.size()-1).status;
+        Toast.makeText(getActivity(),dr.size()+" "+curstatus,Toast.LENGTH_LONG).show();
 
-        //when buttons are clicked
+        if (curstatus.equals("pause")){
+            btnplaypause.setBackground(getActivity().getResources().getDrawable(R.drawable.ic_play_arrow_black_24dp));
+        }
+        else{
+            getActivity().startService(new Intent(getActivity(), MyService.class));
+            btnplaypause.setBackground(getActivity().getResources().getDrawable(R.drawable.ic_pause_black_24dp));
+            getActivity().startService(new Intent(getActivity(), MyService.class));
+        }
+
+        //clicklisteners for pausing and playing
         btnplaypause.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String status;
-
                 ArrayList<dailyrecord> dr = db.selectDailyrecords();
-                if (dr.size() == 0){
-                    db.adddailyrecord(MainActivity.getdatetom(),0,0,0.0,0.0,0.0,"pause");
-                }
-                status = dr.get(dr.size()-1).status;
-                if (status.equals("play")){
+                curstatus = dr.get(dr.size()-1).status;
+                if (curstatus.equals("play")){
                     btnplaypause.setBackground(getActivity().getResources().getDrawable(R.drawable.ic_play_arrow_black_24dp));
                     getActivity().stopService(new Intent(getActivity(), MyService.class));
                     db.updatestatus("pause");
@@ -73,69 +86,29 @@ public class HomeFragment extends Fragment implements SensorEventListener, StepL
                 else{
                     btnplaypause.setBackground(getActivity().getResources().getDrawable(R.drawable.ic_pause_black_24dp));
                     getActivity().startService(new Intent(getActivity(), MyService.class));
-                    running = true;
-                    sensorManager.registerListener(HomeFragment.this, accel, SensorManager.SENSOR_DELAY_FASTEST);
                     db.updatestatus("play");
                 }
 
 
             }
         });
-//        btn_stop.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                running = false;
-//                getActivity().stopService(new Intent(getActivity(), MyService.class));
-//                //sensorManager.unregisterListener(HomeFragment.this);
-//            }
-//        });
+
         return v;
 
 
     }
-
-
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        simpleStepDetector = new StepDetector();
-        simpleStepDetector.registerListener(this);
-        sensorManager = (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
-        accel = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-
-
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        running = false;
-    }
-
-    @Override
-    public void onSensorChanged(SensorEvent event) {
-        if (running){
-            if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-                simpleStepDetector.updateAccel(
-                        event.timestamp, event.values[0], event.values[1], event.values[2]);
-            }
-        }
-
-    }
-
-    @Override
-    public void onAccuracyChanged(Sensor sensor, int i) {
-
-    }
-
-
-    public void step(long timeNs) {
-        MainActivity.numSteps++;
+    public static void updatechart(){
         TvSteps.setText("" + MainActivity.numSteps);
         mPieChart.clearChart();
         mPieChart.addPieSlice(new PieModel("Achieved", MainActivity.numSteps, Color.parseColor("#56B7F1")));
         mPieChart.addPieSlice(new PieModel("Empty", 100 - MainActivity.numSteps, Color.parseColor("#CDA67F")));
-
     }
+
+
+//    public static void changeFragmentTextView(String s) {
+//        Fragment frag = getFragmentManager().findFragmentById(new HomeFragment());
+//        ((TextView) frag.getView().findViewById(R.id.textView)).setText(s);
+//
+//    }
+
 }

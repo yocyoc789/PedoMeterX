@@ -24,6 +24,7 @@ import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.StyleSpan;
 import android.util.Log;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.Locale;
@@ -38,6 +39,7 @@ public class MyService extends Service implements SensorEventListener, StepListe
     private Notification.Builder builder;
     private Notification notification;
     private DBclass db;
+
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
@@ -54,6 +56,8 @@ public class MyService extends Service implements SensorEventListener, StepListe
         snotify();
         player = MediaPlayer.create(this, Settings.System.DEFAULT_RINGTONE_URI);
         player.setLooping(true);
+
+
 
         db = new DBclass(this);
         return START_STICKY;
@@ -85,6 +89,7 @@ public class MyService extends Service implements SensorEventListener, StepListe
     @Override
     public void step(long timeNs) {
         MainActivity.stepz++;
+        HomeFragment.updatechart();
        snotify();
     }
 
@@ -100,7 +105,7 @@ public class MyService extends Service implements SensorEventListener, StepListe
         sb.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), 0, 11, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 
         builder= new Notification.Builder(context)
-                .setContentTitle(sb)
+                .setContentTitle("Steps Today")
                 .setContentText(""+MainActivity.stepz)
                 .setContentIntent(pendingIntent)
                 //.setDefaults(Notification.DEFAULT_SOUND)
