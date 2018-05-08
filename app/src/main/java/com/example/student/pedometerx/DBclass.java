@@ -15,7 +15,7 @@ public class DBclass extends SQLiteOpenHelper {
         super(context, "pedometer.db",null,1);
     }
 
-    public void adddailyrecord(String date, int steps,int stepgoal, double calburned, double distance, double speed, String status){
+    public void adddailyrecord(String date, int steps,int stepgoal, double calburned, double distance, double speed, String status,long time){
         SQLiteDatabase db = getWritableDatabase();
         ContentValues p = new ContentValues();
         p.put("DATE", date);
@@ -25,18 +25,25 @@ public class DBclass extends SQLiteOpenHelper {
         p.put("DISTANCE", distance);
         p.put("SPEED", speed);
         p.put("STATUS", status);
+        p.put("TIME", time);
         db.insert("DAILYRECORD",null,p);
 
     }
-    public void updatedailyrecord(String date, int steps,int stepgoal, double calburned, double distance, double speed, String status){
+    public void updatedailyrecord(String date, int steps,int stepgoal, double calburned, double distance, double speed, String status,long time){
         SQLiteDatabase db = this.getReadableDatabase();
-        String strSQL = "UPDATE DAILYRECORD SET DATE = '"+date+"', STEPS = '"+steps+"', STEPGOAL = '"+stepgoal+"', CALBURNED = '"+calburned+",DISTANCE = '"+distance+"', SPEED = '"+speed+"',STATUS = '"+status+"'";
+        String strSQL = "UPDATE DAILYRECORD SET DATE = '"+date+"', STEPS = '"+steps+"', STEPGOAL = '"+stepgoal+"', CALBURNED = '"+calburned+",DISTANCE = '"+distance+"', SPEED = '"+speed+"',STATUS = '"+status+"', TIME '"+time+"'" ;
         db.execSQL(strSQL);
         db.close();
     }
     public void updatestatus(String status){
         SQLiteDatabase db = this.getReadableDatabase();
         String strSQL = "UPDATE DAILYRECORD SET STATUS = '"+status+"'";
+        db.execSQL(strSQL);
+        db.close();
+    }
+    public void updatetime(long time){
+        SQLiteDatabase db = this.getReadableDatabase();
+        String strSQL = "UPDATE DAILYRECORD SET TIME ='"+time+"'";
         db.execSQL(strSQL);
         db.close();
     }
@@ -106,7 +113,7 @@ public class DBclass extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
-        sqLiteDatabase.execSQL("CREATE TABLE DAILYRECORD (DATE TEXT,STEPS INT,STEPGOAL INT, CALBURNED DOUBLE, DISTANCE DOUBLE, SPEED DOUBLE, STATUS TEXT)");
+        sqLiteDatabase.execSQL("CREATE TABLE DAILYRECORD (DATE TEXT,STEPS INT,STEPGOAL INT, CALBURNED DOUBLE, DISTANCE DOUBLE, SPEED DOUBLE, STATUS TEXT, LONG TIME)");
         sqLiteDatabase.execSQL("CREATE TABLE appstatus (STATUS TEXT)");
     }
 

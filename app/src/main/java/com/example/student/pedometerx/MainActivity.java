@@ -18,6 +18,7 @@ import android.widget.Toast;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -26,7 +27,7 @@ public class MainActivity extends AppCompatActivity  {
     static int numSteps=0;
     static int stepz;
     android.support.v4.app.Fragment selectedFragment=null;
-    DBclass database;
+    static DBclass db;
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
 
@@ -60,6 +61,7 @@ public class MainActivity extends AppCompatActivity  {
 
         getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,new HomeFragment()).commit();
 
+        db = new DBclass(this);
     }
 
     public void sa(View v){
@@ -80,5 +82,11 @@ public class MainActivity extends AppCompatActivity  {
         Date tomorrow = gc.getTime();
         String datet = dateFormat.format(tomorrow);
         return datet;
+    }
+    public static void newday(){
+        ArrayList<dailyrecord> dr = db.selectDailyrecords();
+        if (!dr.get(dr.size()-1).dates.equals(MainActivity.getdatetod())){
+            db.adddailyrecord(MainActivity.getdatetom(),0,0,0.0,0.0,0.0,"pause",0);
+        }
     }
 }

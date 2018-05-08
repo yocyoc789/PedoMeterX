@@ -17,6 +17,7 @@ import android.hardware.SensorManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.IBinder;
 import android.provider.Settings;
 import android.support.annotation.Nullable;
@@ -42,6 +43,7 @@ public class MyService extends Service implements SensorEventListener, StepListe
     private Notification.Builder builder;
     private Notification notification;
     private DBclass db;
+    private long counter;
 
     @Nullable
     @Override
@@ -60,9 +62,22 @@ public class MyService extends Service implements SensorEventListener, StepListe
         player = MediaPlayer.create(this, Settings.System.DEFAULT_RINGTONE_URI);
         player.setLooping(true);
 
-
-
         db = new DBclass(this);
+
+        final CountDownTimer countDownTimer = new CountDownTimer(3000, 1000) {
+            @Override
+            public void onTick(long l) {
+                ArrayList<dailyrecord> dr = db.selectDailyrecords();
+                counter++;
+                long ctime = dr.get(dr.size()-1).time + counter;
+                db.updatetime(ctime);
+            }
+
+            @Override
+            public void onFinish() {
+
+            }
+        };
         return START_STICKY;
     }
 
@@ -94,9 +109,6 @@ public class MyService extends Service implements SensorEventListener, StepListe
         MainActivity.stepz++;
         //HomeFragment.updatechart();
         HomeFragment.setText(MainActivity.stepz+"");
-//        HomeFragment.mPieChart.clearChart();
-//        HomeFragment.mPieChart.addPieSlice(new PieModel("Achieved", MainActivity.stepz, Color.parseColor("#56B7F1")));
-//        HomeFragment.mPieChart.addPieSlice(new PieModel("Empty", 100 - MainActivity.stepz, Color.parseColor("#CDA67F")));
 
         snotify();
     }
@@ -138,6 +150,6 @@ public class MyService extends Service implements SensorEventListener, StepListe
     }
 
     public void addnew(){
-        db.adddailyrecord(MainActivity.getdatetom(),0,0,0.0,0.0,0.0,"paused");
+        db.adddailyrecord(MainActivity.getdatetom(),0,0,0.0,0.0,0.0,"paused",0);
     }
 }

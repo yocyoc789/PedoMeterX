@@ -47,19 +47,21 @@ public class HomeFragment extends Fragment{
         TvSteps.setText(""+MainActivity.numSteps);
         mPieChart = (PieChart) v.findViewById(R.id.piechart);
 
-       // mPieChart.addPieSlice(new PieModel("Freetime", 15, Color.parseColor("#FE6DA8")));
         mPieChart.addPieSlice(new PieModel("Achieved", MainActivity.numSteps, Color.parseColor("#56B7F1")));
         mPieChart.addPieSlice(new PieModel("Empty", 100 - MainActivity.numSteps, Color.parseColor("#CDA67F")));
-        //mPieChart.addPieSlice(new PieModel("Eating", 9, Color.parseColor("#FED70E")));
-        //mPieChart.setLabelFor();
+
         mPieChart.setDrawValueInPie(false);
 
         mPieChart.startAnimation();
 
         ArrayList<dailyrecord> dr = db.selectDailyrecords();
         if (dr.size() == 0){
-            db.adddailyrecord(MainActivity.getdatetom(),0,0,0.0,0.0,0.0,"pause");
+            db.adddailyrecord(MainActivity.getdatetom(),0,0,0.0,0.0,0.0,"pause",0);
         }
+
+        //verify if another day
+        MainActivity.newday();
+
         curstatus = dr.get(dr.size()-1).status;
         Toast.makeText(getActivity(),dr.size()+" "+curstatus,Toast.LENGTH_LONG).show();
 
