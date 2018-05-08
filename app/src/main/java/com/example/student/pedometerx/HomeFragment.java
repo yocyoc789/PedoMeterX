@@ -99,10 +99,8 @@ public class HomeFragment extends Fragment{
     }
     public static void updatechart(){
         TvSteps.setText("" + MainActivity.numSteps);
-        mPieChart.clearChart();
-        mPieChart.addPieSlice(new PieModel("Achieved", MainActivity.numSteps, Color.parseColor("#56B7F1")));
-        mPieChart.addPieSlice(new PieModel("Empty", 100 - MainActivity.numSteps, Color.parseColor("#CDA67F")));
-    }
+
+       }
 
 
 //    public static void changeFragmentTextView(String s) {
@@ -110,5 +108,12 @@ public class HomeFragment extends Fragment{
 //        ((TextView) frag.getView().findViewById(R.id.textView)).setText(s);
 //
 //    }
+        public static void setText(String text) {
+            TvSteps.setText(text);
+            mPieChart.clearChart();
+            mPieChart.addPieSlice(new PieModel("Achieved", MainActivity.stepz, Color.parseColor("#56B7F1")));
+            mPieChart.addPieSlice(new PieModel("Empty", 100 - MainActivity.stepz, Color.parseColor("#CDA67F")));
+
+        }
 
 }

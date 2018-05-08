@@ -8,6 +8,7 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Color;
 import android.graphics.Typeface;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -25,6 +26,8 @@ import android.text.SpannableString;
 import android.text.style.StyleSpan;
 import android.util.Log;
 import android.widget.TextView;
+
+import org.eazegraph.lib.models.PieModel;
 
 import java.util.ArrayList;
 import java.util.Locale;
@@ -89,8 +92,13 @@ public class MyService extends Service implements SensorEventListener, StepListe
     @Override
     public void step(long timeNs) {
         MainActivity.stepz++;
-        HomeFragment.updatechart();
-       snotify();
+        //HomeFragment.updatechart();
+        HomeFragment.setText(MainActivity.stepz+"");
+//        HomeFragment.mPieChart.clearChart();
+//        HomeFragment.mPieChart.addPieSlice(new PieModel("Achieved", MainActivity.stepz, Color.parseColor("#56B7F1")));
+//        HomeFragment.mPieChart.addPieSlice(new PieModel("Empty", 100 - MainActivity.stepz, Color.parseColor("#CDA67F")));
+
+        snotify();
     }
 
     public void snotify(){
