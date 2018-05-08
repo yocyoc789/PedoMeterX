@@ -36,7 +36,7 @@ public class SettingsFragment extends Fragment {
 
         btnaddnewA = (Button)v.findViewById(R.id.btnaddnewA);
 
-
+//jhk
         builder = new AlertDialog.Builder(getActivity());
         builder.setTitle("Title");
         LinearLayout layout = new LinearLayout(getActivity());
