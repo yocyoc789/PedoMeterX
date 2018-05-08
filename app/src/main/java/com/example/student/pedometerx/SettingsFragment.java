@@ -36,7 +36,7 @@ public class SettingsFragment extends Fragment {
 
         btnaddnewA = (Button)v.findViewById(R.id.btnaddnewA);
 
-
+//jhk
         builder = new AlertDialog.Builder(getActivity());
         builder.setTitle("Title");
         LinearLayout layout = new LinearLayout(getActivity());
@@ -77,7 +77,10 @@ public class SettingsFragment extends Fragment {
         btnaddnewA.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view){
+                if (btnaddnewA.getParent()!=null){
+                            ((ViewGroup)btnaddnewA.getParent()).removeAllViews();
 
+                }
                 builder.show();
             }
         });
