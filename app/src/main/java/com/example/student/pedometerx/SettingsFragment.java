@@ -77,7 +77,10 @@ public class SettingsFragment extends Fragment {
         btnaddnewA.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view){
+                if (btnaddnewA.getParent()!=null){
+                            ((ViewGroup)btnaddnewA.getParent()).removeAllViews();
 
+                }
                 builder.show();
             }
         });
