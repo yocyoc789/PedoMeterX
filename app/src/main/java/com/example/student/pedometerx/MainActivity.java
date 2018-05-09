@@ -86,7 +86,7 @@ public class MainActivity extends AppCompatActivity  {
     public static void newday(){
         ArrayList<dailyrecord> dr = db.selectDailyrecords();
         if (!dr.get(dr.size()-1).dates.equals(MainActivity.getdatetod())){
-            db.adddailyrecord(MainActivity.getdatetom(),0,0,0.0,0.0,0.0,"pause",0);
+            db.adddailyrecord(MainActivity.getdatetod(),0,0,0.0,0.0,0.0,"pause",0);
         }
     }
 }

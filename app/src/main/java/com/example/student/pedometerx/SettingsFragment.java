@@ -14,9 +14,14 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import org.w3c.dom.Text;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -85,7 +90,32 @@ public class SettingsFragment extends Fragment {
             }
         });
 
+        LinearLayout settinglist = (LinearLayout)v.findViewById(R.id.settingsLayout);
+        settinglist.setOrientation(LinearLayout.VERTICAL);
 
+        //Set goal
+        LinearLayout.LayoutParams param = new LinearLayout.LayoutParams(140,398);
+        param.setMargins(20,20,20,20);
+        LinearLayout content1 = new LinearLayout(getActivity());
+        content1.setOrientation(LinearLayout.HORIZONTAL);
+
+        ImageView img1 = new ImageButton(getActivity());
+        img1.setImageResource(R.drawable.ic_gps_fixed_black_24dp);
+        TextView tv = new TextView(getActivity());
+        tv.setText("Goals");
+        final Spinner type1 = new Spinner(getActivity());
+        List<String> list1 = new ArrayList<String>();
+        list1.add("1000");
+        list1.add("2000");
+        list1.add("3000");
+        list1.add("4000");
+        ArrayAdapter<String> dataAdapter1 = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item, list1);
+        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        type1.setAdapter(dataAdapter1);
+        content1.addView(img1);
+        content1.addView(tv);
+        content1.addView(type1);
+        settinglist.addView(content1,param);
         return v;
     }
 

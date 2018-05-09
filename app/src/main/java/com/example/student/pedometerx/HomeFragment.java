@@ -35,7 +35,7 @@ public class HomeFragment extends Fragment{
     static PieChart mPieChart;
     public DBclass db;
     public static String curstatus="";
-
+    private TextView tvspeed,tvdistance,tvcalburned;
     @Nullable
 
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -56,7 +56,7 @@ public class HomeFragment extends Fragment{
 
         ArrayList<dailyrecord> dr = db.selectDailyrecords();
         if (dr.size() == 0){
-            db.adddailyrecord(MainActivity.getdatetom(),0,0,0.0,0.0,0.0,"pause",0);
+            db.adddailyrecord(MainActivity.getdatetod(),0,0,0.0,0.0,0.0,"pause",0);
         }
 
         //verify if another day
@@ -64,7 +64,7 @@ public class HomeFragment extends Fragment{
 
         curstatus = dr.get(dr.size()-1).status;
         Toast.makeText(getActivity(),dr.size()+" "+curstatus,Toast.LENGTH_LONG).show();
-
+        TvSteps.setText(dr.get(dr.size()-1).steps+"");
         if (curstatus.equals("pause")){
             btnplaypause.setBackground(getActivity().getResources().getDrawable(R.drawable.ic_play_arrow_black_24dp));
         }
@@ -95,6 +95,10 @@ public class HomeFragment extends Fragment{
             }
         });
 
+
+        tvspeed = (TextView)v.findViewById(R.id.txtspeed);
+        tvdistance = (TextView)v.findViewById(R.id.txtdistance);
+        tvcalburned= (TextView)v.findViewById(R.id.txtcalburned);
         return v;
 
 
@@ -115,7 +119,5 @@ public class HomeFragment extends Fragment{
             mPieChart.clearChart();
             mPieChart.addPieSlice(new PieModel("Achieved", MainActivity.stepz, Color.parseColor("#56B7F1")));
             mPieChart.addPieSlice(new PieModel("Empty", 100 - MainActivity.stepz, Color.parseColor("#CDA67F")));
-
         }
-
 }

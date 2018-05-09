@@ -1,6 +1,7 @@
 package com.example.student.pedometerx;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -44,7 +45,7 @@ public class MyService extends Service implements SensorEventListener, StepListe
     private Notification notification;
     private DBclass db;
     private long counter;
-
+    public CountDownTimer ct;
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
@@ -58,19 +59,21 @@ public class MyService extends Service implements SensorEventListener, StepListe
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         accel = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         sensorManager.registerListener(MyService.this, accel, SensorManager.SENSOR_DELAY_FASTEST);
-        snotify();
+        //snotify();
         player = MediaPlayer.create(this, Settings.System.DEFAULT_RINGTONE_URI);
         player.setLooping(true);
 
         db = new DBclass(this);
 
-        final CountDownTimer countDownTimer = new CountDownTimer(3000, 1000) {
+//        starttime();
+        ct =new CountDownTimer(30000, 1000) {
             @Override
             public void onTick(long l) {
                 ArrayList<dailyrecord> dr = db.selectDailyrecords();
-                counter++;
-                long ctime = dr.get(dr.size()-1).time + counter;
+                long ctime = dr.get(dr.size()-1).time+1;
                 db.updatetime(ctime);
+                counter = ctime;
+                snotify();
             }
 
             @Override
@@ -78,13 +81,34 @@ public class MyService extends Service implements SensorEventListener, StepListe
 
             }
         };
+        ct.start();
+
+
         return START_STICKY;
     }
 
+    public void starttime(){
+        CountDownTimer ct =new CountDownTimer(30000, 1000) {
+            @Override
+            public void onTick(long l) {
+                ArrayList<dailyrecord> dr = db.selectDailyrecords();
+                long ctime = dr.get(dr.size()-1).time+1;
+                db.updatetime(ctime);
+                counter = ctime;
+                snotify();
+            }
+
+            @Override
+            public void onFinish() {
+
+            }
+        }.start();
+    }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
+        ct.cancel();
         notificationManager.cancel(1);
     }
 
@@ -106,11 +130,27 @@ public class MyService extends Service implements SensorEventListener, StepListe
 
     @Override
     public void step(long timeNs) {
-        MainActivity.stepz++;
         //HomeFragment.updatechart();
-        HomeFragment.setText(MainActivity.stepz+"");
+        ArrayList<dailyrecord> dr = db.selectDailyrecords();
+        db.updatesteps(dr.get(dr.size()-1).steps + 1);
+        //HomeFragment.setText(cursteps+"");
+        String cursteps =dr.get(dr.size()-1).steps+"";
+        HomeFragment.setText(cursteps);
+        //snotify();
+    }
 
-        snotify();
+    public double calculatedistance(){
+        double distance;
+        ArrayList<dailyrecord> dr = db.selectDailyrecords();
+        distance = dr.get(dr.size()-1).steps * 2.5;
+        return distance;
+    }
+
+    public void calculatespeed(){
+
+    }
+    public void caloryburned(){
+
     }
 
     public void snotify(){
@@ -126,7 +166,7 @@ public class MyService extends Service implements SensorEventListener, StepListe
 
         builder= new Notification.Builder(context)
                 .setContentTitle("Steps Today")
-                .setContentText(""+MainActivity.stepz)
+                .setContentText(""+MainActivity.stepz+" "+counter)
                 .setContentIntent(pendingIntent)
                 //.setDefaults(Notification.DEFAULT_SOUND)
                 .setAutoCancel(false)

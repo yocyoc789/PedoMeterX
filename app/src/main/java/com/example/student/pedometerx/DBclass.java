@@ -15,7 +15,7 @@ public class DBclass extends SQLiteOpenHelper {
         super(context, "pedometer.db",null,1);
     }
 
-    public void adddailyrecord(String date, int steps,int stepgoal, double calburned, double distance, double speed, String status,long time){
+    public void adddailyrecord(String date, long steps,long stepgoal, double calburned, double distance, double speed, String status,long time){
         SQLiteDatabase db = getWritableDatabase();
         ContentValues p = new ContentValues();
         p.put("DATE", date);
@@ -27,9 +27,9 @@ public class DBclass extends SQLiteOpenHelper {
         p.put("STATUS", status);
         p.put("TIME", time);
         db.insert("DAILYRECORD",null,p);
-
     }
-    public void updatedailyrecord(String date, int steps,int stepgoal, double calburned, double distance, double speed, String status,long time){
+
+    public void updatedailyrecord(String date, long steps,long stepgoal, double calburned, double distance, double speed, String status,long time){
         SQLiteDatabase db = this.getReadableDatabase();
         String strSQL = "UPDATE DAILYRECORD SET DATE = '"+date+"', STEPS = '"+steps+"', STEPGOAL = '"+stepgoal+"', CALBURNED = '"+calburned+",DISTANCE = '"+distance+"', SPEED = '"+speed+"',STATUS = '"+status+"', TIME '"+time+"'" ;
         db.execSQL(strSQL);
@@ -38,6 +38,12 @@ public class DBclass extends SQLiteOpenHelper {
     public void updatestatus(String status){
         SQLiteDatabase db = this.getReadableDatabase();
         String strSQL = "UPDATE DAILYRECORD SET STATUS = '"+status+"'";
+        db.execSQL(strSQL);
+        db.close();
+    }
+    public void updatesteps(long steps){
+        SQLiteDatabase db = this.getReadableDatabase();
+        String strSQL = "UPDATE DAILYRECORD SET STEPS = '"+steps+"'";
         db.execSQL(strSQL);
         db.close();
     }
@@ -60,13 +66,14 @@ public class DBclass extends SQLiteOpenHelper {
         while (c.isAfterLast() == false){
             String date = c.getString(c.getColumnIndex("DATE"));
             String status = c.getString(c.getColumnIndex("STATUS"));
-            int step = c.getInt(c.getColumnIndex("STEPS"));
-            int stepgoal = c.getInt(c.getColumnIndex("STEPGOAL"));
+            long step = c.getLong(c.getColumnIndex("STEPS"));
+            long stepgoal = c.getLong(c.getColumnIndex("STEPGOAL"));
             double speed = c.getDouble(c.getColumnIndex("SPEED"));
             double calburned = c.getDouble(c.getColumnIndex("CALBURNED"));
             double distance = c.getDouble(c.getColumnIndex("DISTANCE"));
+            long time = c.getLong(c.getColumnIndex("TIME"));
 
-            dailyrecord dr = new dailyrecord(date,step,stepgoal,speed,calburned,distance,status);
+            dailyrecord dr = new dailyrecord(date,step,stepgoal,speed,calburned,distance,status,time);
             result.add(dr);
             c.moveToNext();
         }
@@ -113,7 +120,7 @@ public class DBclass extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
-        sqLiteDatabase.execSQL("CREATE TABLE DAILYRECORD (DATE TEXT,STEPS INT,STEPGOAL INT, CALBURNED DOUBLE, DISTANCE DOUBLE, SPEED DOUBLE, STATUS TEXT, LONG TIME)");
+        sqLiteDatabase.execSQL("CREATE TABLE DAILYRECORD (DATE TEXT,STEPS LONG,STEPGOAL LONG, CALBURNED DOUBLE, DISTANCE DOUBLE, SPEED DOUBLE, STATUS TEXT, TIME LONG)");
         sqLiteDatabase.execSQL("CREATE TABLE appstatus (STATUS TEXT)");
     }
 
