@@ -2,6 +2,7 @@ package com.example.student.pedometerx;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -28,10 +29,13 @@ import android.text.SpannableString;
 import android.text.style.StyleSpan;
 import android.util.Log;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.eazegraph.lib.models.PieModel;
 
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 
 public class MyService extends Service implements SensorEventListener, StepListener {
@@ -45,7 +49,7 @@ public class MyService extends Service implements SensorEventListener, StepListe
     private Notification notification;
     private DBclass db;
     private long counter;
-    public CountDownTimer ct;
+    CountDownTimer ct;
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
@@ -59,45 +63,32 @@ public class MyService extends Service implements SensorEventListener, StepListe
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         accel = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         sensorManager.registerListener(MyService.this, accel, SensorManager.SENSOR_DELAY_FASTEST);
-        //snotify();
+        snotify();
         player = MediaPlayer.create(this, Settings.System.DEFAULT_RINGTONE_URI);
         player.setLooping(true);
 
+
         db = new DBclass(this);
-
-//        starttime();
-        ct =new CountDownTimer(30000, 1000) {
-            @Override
-            public void onTick(long l) {
-                ArrayList<dailyrecord> dr = db.selectDailyrecords();
-                long ctime = dr.get(dr.size()-1).time+1;
-                db.updatetime(ctime);
-                counter = ctime;
-                snotify();
-            }
-
-            @Override
-            public void onFinish() {
-
-            }
-        };
-        ct.start();
+        Timer();
 
 
         return START_STICKY;
     }
 
-    public void starttime(){
-        CountDownTimer ct =new CountDownTimer(30000, 1000) {
+    public void Timer(){
+
+         ct = new CountDownTimer(86400, 1000) {
             @Override
             public void onTick(long l) {
                 ArrayList<dailyrecord> dr = db.selectDailyrecords();
-                long ctime = dr.get(dr.size()-1).time+1;
-                db.updatetime(ctime);
-                counter = ctime;
-                snotify();
+                if(dr.get(dr.size()-1).status.equals("play")){
+                    long ctime = dr.get(dr.size()-1).time+1;
+                    db.updatetime(ctime);
+                    String hms=String.format("%02d:%02d:%02d", ctime / 3600,
+                            (ctime % 3600) / 60, (ctime % 60));
+                    HomeFragment.calculatetime(hms);
+                }
             }
-
             @Override
             public void onFinish() {
 
@@ -111,6 +102,7 @@ public class MyService extends Service implements SensorEventListener, StepListe
         ct.cancel();
         notificationManager.cancel(1);
     }
+
 
     @Override
     public void onSensorChanged(SensorEvent event) {
@@ -128,30 +120,20 @@ public class MyService extends Service implements SensorEventListener, StepListe
 
     }
 
+    @SuppressLint("DefaultLocale")
     @Override
     public void step(long timeNs) {
-        //HomeFragment.updatechart();
+        HomeFragment.updatechart();
         ArrayList<dailyrecord> dr = db.selectDailyrecords();
         db.updatesteps(dr.get(dr.size()-1).steps + 1);
-        //HomeFragment.setText(cursteps+"");
         String cursteps =dr.get(dr.size()-1).steps+"";
-        HomeFragment.setText(cursteps);
-        //snotify();
-    }
+        HomeFragment.setText(cursteps+"");
+        HomeFragment.calcldistance(Double.parseDouble(cursteps),this);
+        HomeFragment.calcspeed(dr.get(dr.size()-1).distances,this);
+        snotify();
 
-    public double calculatedistance(){
-        double distance;
-        ArrayList<dailyrecord> dr = db.selectDailyrecords();
-        distance = dr.get(dr.size()-1).steps * 2.5;
-        return distance;
-    }
 
-    public void calculatespeed(){
-
-    }
-    public void caloryburned(){
-
-    }
+        }
 
     public void snotify(){
         IntentFilter intentFilter = new IntentFilter();
@@ -166,7 +148,7 @@ public class MyService extends Service implements SensorEventListener, StepListe
 
         builder= new Notification.Builder(context)
                 .setContentTitle("Steps Today")
-                .setContentText(""+MainActivity.stepz+" "+counter)
+                .setContentText(""+MainActivity.stepz)
                 .setContentIntent(pendingIntent)
                 //.setDefaults(Notification.DEFAULT_SOUND)
                 .setAutoCancel(false)
@@ -192,4 +174,6 @@ public class MyService extends Service implements SensorEventListener, StepListe
     public void addnew(){
         db.adddailyrecord(MainActivity.getdatetom(),0,0,0.0,0.0,0.0,"paused",0);
     }
+
+
 }

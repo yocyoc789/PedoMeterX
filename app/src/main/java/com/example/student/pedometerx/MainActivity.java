@@ -1,6 +1,9 @@
 package com.example.student.pedometerx;
 
+import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.Fragment;
+import android.content.Context;
 import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -26,6 +29,7 @@ import java.util.GregorianCalendar;
 public class MainActivity extends AppCompatActivity  {
     static int numSteps=0;
     static int stepz;
+    MainActivity mn;
     android.support.v4.app.Fragment selectedFragment=null;
     static DBclass db;
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
@@ -89,4 +93,14 @@ public class MainActivity extends AppCompatActivity  {
             db.adddailyrecord(MainActivity.getdatetod(),0,0,0.0,0.0,0.0,"pause",0);
         }
     }
+    private boolean isMyServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 }

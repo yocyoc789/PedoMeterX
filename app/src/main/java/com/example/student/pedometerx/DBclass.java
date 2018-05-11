@@ -47,6 +47,24 @@ public class DBclass extends SQLiteOpenHelper {
         db.execSQL(strSQL);
         db.close();
     }
+    public void updateDistanceSpeedCalBurned(double distance, double speed, double calburned){
+        SQLiteDatabase db = this.getReadableDatabase();
+        String strSQL = "UPDATE DAILYRECORD SET DISTANCE = '"+distance+"', SPEED = '"+speed+"', CALBURNED = '"+calburned+"'";
+        db.execSQL(strSQL);
+        db.close();
+    }
+    public void updatedistance(double distance){
+        SQLiteDatabase db = this.getReadableDatabase();
+        String strSQL = "UPDATE DAILYRECORD SET DISTANCE = '"+distance+"'";
+        db.execSQL(strSQL);
+        db.close();
+    }
+    public void updatedspeed(double speed){
+        SQLiteDatabase db = this.getReadableDatabase();
+        String strSQL = "UPDATE DAILYRECORD SET SPEED = '"+speed+"'";
+        db.execSQL(strSQL);
+        db.close();
+    }
     public void updatetime(long time){
         SQLiteDatabase db = this.getReadableDatabase();
         String strSQL = "UPDATE DAILYRECORD SET TIME ='"+time+"'";

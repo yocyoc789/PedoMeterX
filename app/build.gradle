@@ -37,4 +37,5 @@ dependencies {
 dependencies {
     implementation 'com.github.blackfizz:eazegraph:1.2.2@aar'
     implementation 'com.nineoldandroids:library:2.4.0'
+    implementation 'com.github.markushi:circlebutton:1.1'
 }
