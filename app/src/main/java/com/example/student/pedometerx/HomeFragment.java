@@ -2,6 +2,7 @@ package com.example.student.pedometerx;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
@@ -25,6 +26,7 @@ import android.widget.Toast;
 import org.eazegraph.lib.charts.PieChart;
 import org.eazegraph.lib.models.PieModel;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Formatter;
 import java.util.Locale;
@@ -36,11 +38,10 @@ public class HomeFragment extends Fragment{
 
     static TextView textView,TvSteps;
     Button btnplaypause;
-    static CountDownTimer ct;
     static PieChart mPieChart;
     public static DBclass db;
     public static String curstatus="";
-    static TextView tvspeed,tvdistance,tvcalburned,tvtimer;
+    static TextView tvspeed,tvdistance,tvcalburned,tvtimer,txtstepgoal;
 
     @Nullable
 
@@ -58,34 +59,45 @@ public class HomeFragment extends Fragment{
         tvdistance = (TextView)v.findViewById(R.id.txtdistance);
         tvcalburned= (TextView)v.findViewById(R.id.txtcalburned);
         tvtimer=(TextView)v.findViewById(R.id.timer);
+        txtstepgoal=(TextView)v.findViewById(R.id.txtstepgoal);
 
         ArrayList<dailyrecord> dr = db.selectDailyrecords();
         if (dr.size() == 0){
             db.adddailyrecord(MainActivity.getdatetod(),0,0,0.0,0.0,0.0,"pause",0);
+            db.adduserinfo(50.0, 2.5);
         }
-
         //verify if another day
         MainActivity.newday();
 
+        ArrayList<Userinfo> ui = db.selectUserInfo();
+        Toast.makeText(getActivity(), ui.get(ui.size()-1).stepdis+"", Toast.LENGTH_SHORT).show();
+        dr = db.selectDailyrecords();
         curstatus = dr.get(dr.size()-1).status;
         Toast.makeText(getActivity(),dr.size()+" "+curstatus,Toast.LENGTH_LONG).show();
 
         //add data to current
-        TvSteps.setText(dr.get(dr.size()-1).steps+"");
-        tvdistance.setText(dr.get(dr.size()-1).distances+" mile");
-        tvspeed.setText(dr.get(dr.size()-1).speeds+" mile/h");
-        //tvtimer.setText(stringForTime(dr.get(dr.size()-1).time)+"");
+
 
         if (curstatus.equals("pause")){
             btnplaypause.setBackground(getActivity().getResources().getDrawable(R.drawable.ic_play_arrow_black_24dp));
         }
         else{
             btnplaypause.setBackground(getActivity().getResources().getDrawable(R.drawable.ic_pause_black_24dp));
-            if(MyService.class !=null){
+            if(isMyServiceRunning(MyService.class,getActivity())){
+
+            }
+            else{
                 getActivity().startService(new Intent(getActivity(), MyService.class));
             }
-
         }
+
+        TvSteps.setText(dr.get(dr.size()-1).steps+"");
+        tvdistance.setText(dr.get(dr.size()-1).distances+" mile");
+        tvspeed.setText(dr.get(dr.size()-1).speeds+" mile/h");
+        tvtimer.setText(String.format("%02d:%02d:%02d", dr.get(dr.size()-1).time / 3600,
+                (dr.get(dr.size()-1).time % 3600) / 60, (dr.get(dr.size()-1).time % 60)));
+        txtstepgoal.setText("Goal\n"+dr.get(dr.size()-1).stepsgoal+"");
+        tvcalburned.setText(dr.get(dr.size()-1).calburned+" calories");
 
         updatechart();
         mPieChart.startAnimation();
@@ -111,13 +123,19 @@ public class HomeFragment extends Fragment{
 
             }
         });
-
-
-
         return v;
-
-
     }
+    public boolean isMyServiceRunning(Class<?> serviceClass,Context c) {
+        ActivityManager manager = (ActivityManager) c.getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
         public static void setText(String text) {
             if (TvSteps != null) {
                 TvSteps.setText(text);
@@ -128,15 +146,17 @@ public class HomeFragment extends Fragment{
         public static void updatechart() {
             if (TvSteps != null) {
                 ArrayList<dailyrecord> dr = db.selectDailyrecords();
+                mPieChart.addPieSlice(new PieModel("Empty", dr.get(dr.size()-1).stepsgoal - dr.get(dr.size() - 1).steps, Color.parseColor("#A9A9A9")));
                 mPieChart.addPieSlice(new PieModel("Achieved", dr.get(dr.size() - 1).steps, Color.parseColor("#56B7F1")));
-                mPieChart.addPieSlice(new PieModel("Empty", 1000 - dr.get(dr.size() - 1).steps, Color.parseColor("#CDA67F")));
-            }
+                 }
         }
 
         public static void calcldistance(double distance,Context context){
             DBclass dbl = new DBclass(context);
             ArrayList<dailyrecord> dr = dbl.selectDailyrecords();
-            distance = dr.get(dr.size()-1).steps * 0.0003787;
+            ArrayList<Userinfo> ui = dbl.selectUserInfo();
+            double converttomiles = ui.get(ui.size()-1).stepdis * 0.00018939;
+            distance = dr.get(dr.size()-1).steps * converttomiles;
             String rounded = String.format("%.6f",distance).replaceAll("0*$","");
             dbl.updatedistance(Double.parseDouble(rounded));
             if(tvdistance!=null){
@@ -158,5 +178,14 @@ public class HomeFragment extends Fragment{
             if (tvtimer!= null) {
                 tvtimer.setText(time);
             }
+        }
+        public static void calculatecalburned(Context context){
+            DBclass dbl = new DBclass(context);
+            ArrayList<Userinfo> ui = dbl.selectUserInfo();
+            ArrayList<dailyrecord> dr = dbl.selectDailyrecords();
+            double kgtopounds = ui.get(ui.size()-1).weight * 2.20462262;
+            double calburned = dr.get(dr.size()-1).distances * kgtopounds;
+            String rounded = String.format("%.2f",calburned).replaceAll("0*$","");
+
         }
 }

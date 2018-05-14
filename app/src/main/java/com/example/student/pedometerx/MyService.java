@@ -42,13 +42,12 @@ public class MyService extends Service implements SensorEventListener, StepListe
     private SensorManager sensorManager;
     private Sensor accel;
     private StepDetector simpleStepDetector;
-    private int steps=0;
     private NotificationManager notificationManager;
     private MediaPlayer player;
     private Notification.Builder builder;
     private Notification notification;
     private DBclass db;
-    private long counter;
+
     CountDownTimer ct;
     @Nullable
     @Override
@@ -76,7 +75,9 @@ public class MyService extends Service implements SensorEventListener, StepListe
     }
 
     public void Timer(){
-
+        if(ct!=null){
+            ct.cancel();
+        }
          ct = new CountDownTimer(86400, 1000) {
             @Override
             public void onTick(long l) {
@@ -101,6 +102,7 @@ public class MyService extends Service implements SensorEventListener, StepListe
         super.onDestroy();
         ct.cancel();
         notificationManager.cancel(1);
+        sensorManager.unregisterListener(MyService.this);
     }
 
 
@@ -110,7 +112,6 @@ public class MyService extends Service implements SensorEventListener, StepListe
             if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
                 simpleStepDetector.updateAccel(
                         event.timestamp, event.values[0], event.values[1], event.values[2]);
-
             }
 
     }

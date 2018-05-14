@@ -12,5 +12,18 @@
         <item>40000</item>
         <item>50000</item>
     </string-array>
-
+    <string-array name="stepdis">
+        <item>2 FT</item>
+        <item>2.1 FT</item>
+        <item>2.2 FT</item>
+        <item>2.2 FT</item>
+        <item>2.3 FT</item>
+        <item>2.4 FT</item>
+        <item>2.5 FT</item>
+        <item>2.6 FT</item>
+        <item>2.7 FT</item>
+        <item>2.8 FT</item>
+        <item>2.9 FT</item>
+        <item>2.10 FT</item>
+    </string-array>
 </resources>
