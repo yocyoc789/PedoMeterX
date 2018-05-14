@@ -186,6 +186,9 @@ public class HomeFragment extends Fragment{
             double kgtopounds = ui.get(ui.size()-1).weight * 2.20462262;
             double calburned = dr.get(dr.size()-1).distances * kgtopounds;
             String rounded = String.format("%.2f",calburned).replaceAll("0*$","");
-
+            dbl.updatecalburned(Double.parseDouble(rounded));
+            if (tvcalburned!=null){
+                tvcalburned.setText(rounded+ "calories");
+            }
         }
 }

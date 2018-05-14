@@ -131,6 +131,7 @@ public class MyService extends Service implements SensorEventListener, StepListe
         HomeFragment.setText(cursteps+"");
         HomeFragment.calcldistance(Double.parseDouble(cursteps),this);
         HomeFragment.calcspeed(dr.get(dr.size()-1).distances,this);
+        HomeFragment.calculatecalburned(this);
         snotify();
 
 
