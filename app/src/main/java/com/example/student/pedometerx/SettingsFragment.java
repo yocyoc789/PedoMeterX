@@ -170,7 +170,7 @@ public class SettingsFragment extends Fragment {
             TextView txttotaltype = (TextView) v.findViewById(R.id.txttypetotal);
             TextView txtsets = (TextView) v.findViewById(R.id.txtsets);
             TextView txtid = (TextView)v.findViewById(R.id.txtid);
-
+//asd
             String getdattod = "Created on "+am.get(i).datecreated;
             if(am.get(i).status.equals("unfinished")){
                 if(am.get(i).type.equals("Speed")){
