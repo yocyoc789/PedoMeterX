@@ -61,9 +61,11 @@ public class HomeFragment extends Fragment{
         tvtimer=(TextView)v.findViewById(R.id.timer);
         txtstepgoal=(TextView)v.findViewById(R.id.txtstepgoal);
 
+
+
         ArrayList<dailyrecord> dr = db.selectDailyrecords();
         if (dr.size() == 0){
-            db.adddailyrecord(MainActivity.getdatetod(),0,0,0.0,0.0,0.0,"pause",0);
+            db.adddailyrecord(MainActivity.getdatetod(),0,10000,0.0,0.0,0.0,"pause",0);
             db.adduserinfo(50.0, 2.5);
         }
         //verify if another day
@@ -97,7 +99,7 @@ public class HomeFragment extends Fragment{
         tvtimer.setText(String.format("%02d:%02d:%02d", dr.get(dr.size()-1).time / 3600,
                 (dr.get(dr.size()-1).time % 3600) / 60, (dr.get(dr.size()-1).time % 60)));
         txtstepgoal.setText("Goal\n"+dr.get(dr.size()-1).stepsgoal+"");
-        tvcalburned.setText(dr.get(dr.size()-1).calburned+" calories");
+        tvcalburned.setText(dr.get(dr.size()-1).calburned+" kcal");
 
         updatechart();
         mPieChart.startAnimation();
@@ -188,7 +190,45 @@ public class HomeFragment extends Fragment{
             String rounded = String.format("%.2f",calburned).replaceAll("0*$","");
             dbl.updatecalburned(Double.parseDouble(rounded));
             if (tvcalburned!=null){
-                tvcalburned.setText(rounded+ "calories");
+                tvcalburned.setText(rounded+ " kcal");
             }
         }
+    public static void checkifachieved(Context context){
+        DBclass db = new DBclass(context);
+        ArrayList<dailyrecord> dr = db.selectDailyrecords();
+        ArrayList<Achievement> am = db.selectAchievement();
+        for(int i=0;i<dr.size();i++){
+            if (!am.get(i).status.equals("finished")){
+                if(am.get(i).stattoday.equals("no")){
+                    if(am.get(i).type.equals("Distance")){
+                        if(dr.get(dr.size()-1).distances <= am.get(i).total){
+                            db.updateAchievementstattoday("yes",am.get(i).id);
+                            db.updateSetsAchieved(am.get(i).setsachieved+1,am.get(i).id);
+                            if(am.get(i).setsachieved == am.get(i).sets){
+                                db.updateAchievementstatus("finished",am.get(i).id);
+                            }
+                        }
+                    }
+                    else if(am.get(i).type.equals("Speed")){
+                        if(dr.get(dr.size()-1).speeds <= am.get(i).total){
+                            db.updateAchievementstattoday("yes",am.get(i).id);
+                            db.updateSetsAchieved(am.get(i).setsachieved+1,am.get(i).id);
+                            if(am.get(i).setsachieved == am.get(i).sets){
+                                db.updateAchievementstatus("finished",am.get(i).id);
+                            }
+                        }
+                    }
+                    else{
+                        if(dr.get(dr.size()-1).calburned <= am.get(i).total){
+                            db.updateAchievementstattoday("yes",am.get(i).id);
+                            db.updateSetsAchieved(am.get(i).setsachieved+1,am.get(i).id);
+                            if(am.get(i).setsachieved == am.get(i).sets){
+                                db.updateAchievementstatus("finished",am.get(i).id);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 }

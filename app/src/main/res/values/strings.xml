@@ -26,4 +26,20 @@
         <item>2.9 FT</item>
         <item>2.10 FT</item>
     </string-array>
+    <string-array name="type">
+        <item>Speed</item>
+        <item>Burn Calories</item>
+        <item>Distance</item>
+    </string-array>
+    <string-array name="Sets">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+    </string-array>
+
+
 </resources>

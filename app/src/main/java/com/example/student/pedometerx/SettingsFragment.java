@@ -1,6 +1,7 @@
 package com.example.student.pedometerx;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -30,7 +31,7 @@ public class SettingsFragment extends Fragment {
     Spinner spinnergoal, spinnerstepdis;
     static TextView tvweight;
     ListView listView;
-    DBclass db;
+    public DBclass db;
 
     int[] IMAGES = {R.drawable.ic_pause_black_24dp,R.drawable.ic_pause_black_24dp,R.drawable.ic_pause_black_24dp,R.drawable.ic_pause_black_24dp,R.drawable.ic_pause_black_24dp};
     String[] NAMES = {"Add black","Equalizer black","GPS qwerty","asdasdas","sadasdas"};
@@ -139,10 +140,16 @@ public class SettingsFragment extends Fragment {
         return v;
     }
     class CustomAdapter extends BaseAdapter {
+        DBclass db = new DBclass(getActivity());
+        ArrayList<Achievement> am = db.selectAchievement();
+        ArrayList<dailyrecord> dr = db.selectDailyrecords();
+        ArrayList<String> title = new ArrayList<>();
+        ArrayList<String> total = new ArrayList<>();
+        ArrayList<String> sets = new ArrayList<>();
 
         @Override
         public int getCount() {
-            return IMAGES.length;
+            return am.size();
         }
 
         @Override
@@ -164,9 +171,25 @@ public class SettingsFragment extends Fragment {
             TextView txtsets = (TextView) v.findViewById(R.id.txtsets);
             TextView txtid = (TextView)v.findViewById(R.id.txtid);
 
-            img1.setImageResource(IMAGES[i]);
-            txttitle.setText(NAMES[i]);
-            txttotaltype.setText(Description[i]);
+            String getdattod = "Created on "+am.get(i).datecreated;
+            if(am.get(i).status.equals("unfinished")){
+                if(am.get(i).type.equals("Speed")){
+                    img1.setImageResource(R.drawable.speed);
+                    txttotaltype.setText("Speed up to "+am.get(i).total+" mile/h\n"+getdattod);
+                }
+                else if(am.get(i).type.equals("Distance")){
+                    img1.setImageResource(R.drawable.distance);
+                    txttotaltype.setText("Reach "+am.get(i).total+" miles\n"+getdattod);
+                }
+                else{
+                    img1.setImageResource(R.drawable.calory);
+                    txttotaltype.setText("Burn "+am.get(i).total+" calories\n"+getdattod);
+                }
+                txttitle.setText(am.get(i).title);
+                txtsets.setText(am.get(i).setsachieved+"/"+am.get(i).sets);
+                txtid.setText(am.get(i).id+"");
+            }
+
 
             return v;
         }

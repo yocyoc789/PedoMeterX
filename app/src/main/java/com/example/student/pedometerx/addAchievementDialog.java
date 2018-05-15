@@ -10,6 +10,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.zip.Inflater;
@@ -31,18 +32,18 @@ public class addAchievementDialog extends AppCompatDialogFragment {
         spintype = (Spinner)view.findViewById(R.id.spinnertype);
         spinsets = (Spinner)view.findViewById(R.id.spinnersets);
         txtunit = (TextView)view.findViewById(R.id.txtunit);
-        spinsets.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        spintype.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 ArrayList<Achievement> am = db.selectAchievement();
-                if(spinsets.getSelectedItem().equals("speed")){
+                if(spintype.getSelectedItem().equals("Speed")){
                     txtunit.setText("mile/hour");
                 }
-                else if(spinsets.getSelectedItem().equals("distance")){
-                    txtunit.setText("mile");
+                else if(spintype.getSelectedItem().equals("Distance")){
+                    txtunit.setText("miles");
                 }
-                else if(spinsets.getSelectedItem().equals("Calories Burn")){
-
+                else if(spintype.getSelectedItem().equals("Burn Calories")){
+                    txtunit.setText("kcal");
                 }
             }
 
@@ -52,7 +53,7 @@ public class addAchievementDialog extends AppCompatDialogFragment {
             }
         });
         builder.setView(view)
-                .setTitle("Add New Achievment")
+                .setTitle("Add New Achievement")
                 .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
@@ -62,12 +63,20 @@ public class addAchievementDialog extends AppCompatDialogFragment {
                 .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        ArrayList<dailyrecord> dr = db.selectDailyrecords();
+                        ArrayList<Achievement> am = db.selectAchievement();
                         String title = txttitle.getText().toString();
                         String type = (String) spintype.getSelectedItem();
                         double total = Double.parseDouble(String.valueOf(txttotal.getText()));
-                        int sets = (int) spinsets.getSelectedItem();
-                        db.addnewachievement(dr.size(),title,type,total,sets,"unfinished","no");
+                        int sets = Integer.parseInt(String.valueOf(spinsets.getSelectedItem()));
+
+                        if(txttitle.getText().equals("") && txttotal.getText().equals("")){
+                            Toast.makeText(getActivity(),"Please fill all fields",Toast.LENGTH_SHORT).show();
+                        }
+                        else{
+                            db.addnewachievement(am.size()+1,MainActivity.getdatetod(), title,type,total,sets,0,"unfinished","no");
+                            getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,new SettingsFragment()).commit();
+
+                        }
                     }
                 });
     return builder.create();

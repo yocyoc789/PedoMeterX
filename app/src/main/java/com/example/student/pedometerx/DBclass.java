@@ -28,14 +28,16 @@ public class DBclass extends SQLiteOpenHelper {
         p.put("TIME", time);
         db.insert("DAILYRECORD",null,p);
     }
-    public void addnewachievement(int id, String title, String type, double total, int sets, String status, String stattoday){
+    public void addnewachievement(int id,String datecreated, String title, String type, double total, int sets, int setsachieve, String status, String stattoday){
         SQLiteDatabase db = getWritableDatabase();
         ContentValues p = new ContentValues();
         p.put("ID", id);
+        p.put("DATECREATED", datecreated);
         p.put("TITLE", title);
         p.put("TYPE", type);
         p.put("TOTAL", total);
         p.put("SETS", sets);
+        p.put("SETSACHIEVE", setsachieve);
         p.put("STATUS", status);
         p.put("STATTODAY", stattoday);
         db.insert("ACHIEVEMENT",null,p);
@@ -116,6 +118,24 @@ public class DBclass extends SQLiteOpenHelper {
         db.execSQL(strSQL);
         db.close();
     }
+    public void updateAchievementstatus(String status,int id){
+        SQLiteDatabase db = this.getReadableDatabase();
+        String strSQL = "UPDATE ACHIEVEMENT SET STATUS ='"+status+"' WHERE ID = '"+ id +"'";
+        db.execSQL(strSQL);
+        db.close();
+    }
+    public void updateAchievementstattoday(String stattoday,int id){
+        SQLiteDatabase db = this.getReadableDatabase();
+        String strSQL = "UPDATE ACHIEVEMENT SET STATTODAY ='"+stattoday+"' WHERE ID ='"+ id +"'";
+        db.execSQL(strSQL);
+        db.close();
+    }
+    public void updateSetsAchieved(int sets, int id){
+        SQLiteDatabase db = this.getReadableDatabase();
+        String strSQL = "UPDATE ACHIEVEMENT SET SETSACHIEVE ='"+sets+"' WHERE ID ='"+ id +"'";
+        db.execSQL(strSQL);
+        db.close();
+    }
 //    public void deleteStudent(String nameid){
 //        SQLiteDatabase db = this.getWritableDatabase();
 //        db.execSQL("DELETE FROM students WHERE NAME= '"+nameid+"'");
@@ -142,6 +162,8 @@ public class DBclass extends SQLiteOpenHelper {
         }
         return result;
     }
+    //public ArrayList<Integer> selectAchievementId
+
     public ArrayList<Achievement> selectAchievement(){
         ArrayList<Achievement> result = new ArrayList<>();
         SQLiteDatabase db = getReadableDatabase();
@@ -150,12 +172,14 @@ public class DBclass extends SQLiteOpenHelper {
         while (c.isAfterLast() == false){
             int id = c.getInt(c.getColumnIndex("ID"));
             int sets= c.getInt(c.getColumnIndex("SETS"));
+            int setsachieve= c.getInt(c.getColumnIndex("SETSACHIEVE"));
+            String datecreated = c.getString(c.getColumnIndex("DATECREATED"));
             String title = c.getString(c.getColumnIndex("TITLE"));
             String type = c.getString(c.getColumnIndex("TYPE"));
             String status = c.getString(c.getColumnIndex("STATUS"));
             String stattoday = c.getString(c.getColumnIndex("STATTODAY"));
             double total = c.getDouble(c.getColumnIndex("TOTAL"));
-            Achievement achievement = new Achievement(id,title,type,total,sets,status,stattoday);
+            Achievement achievement = new Achievement(id,datecreated,title,type,total,sets, setsachieve,status,stattoday);
             result.add(achievement);
             c.moveToNext();
         }
@@ -217,7 +241,7 @@ public class DBclass extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
         sqLiteDatabase.execSQL("CREATE TABLE DAILYRECORD (DATE TEXT,STEPS LONG,STEPGOAL LONG, CALBURNED DOUBLE, DISTANCE DOUBLE, SPEED DOUBLE, STATUS TEXT, TIME LONG)");
-        sqLiteDatabase.execSQL("CREATE TABLE ACHIEVEMENT (ID INT, TITLE TEXT, TYPE TEXT, TOTAL DOUBLE, SETS INT, STATUS TEXT, STATTODAY TEXT)");
+        sqLiteDatabase.execSQL("CREATE TABLE ACHIEVEMENT (ID INT ,DATECREATED TEXT, TITLE TEXT, TYPE TEXT, TOTAL DOUBLE, SETS INT, SETSACHIEVE INT, STATUS TEXT, STATTODAY TEXT)");
         sqLiteDatabase.execSQL("CREATE TABLE USERINFO (WEIGHT DOUBLE, STEPDIS DOUBLE)");
     }
 

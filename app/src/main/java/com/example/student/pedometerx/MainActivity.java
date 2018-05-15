@@ -88,8 +88,16 @@ public class MainActivity extends AppCompatActivity  {
     }
     public static void newday(){
         ArrayList<dailyrecord> dr = db.selectDailyrecords();
+        ArrayList<Achievement> am = db.selectAchievement();
         if (!dr.get(dr.size()-1).dates.equals(MainActivity.getdatetod())){
-            db.adddailyrecord(MainActivity.getdatetod(),0,0,0.0,0.0,0.0,"pause",0);
+            db.adddailyrecord(MainActivity.getdatetod(),0,10000,0.0,0.0,0.0,"pause",0);
+            for(int i =0;i<am.size();i++){
+                if(am.get(i).status.equals("unfinished")){
+                    if(am.get(i).stattoday.equals("yes")){
+                        db.updateAchievementstattoday("no",am.get(i).id);
+                    }
+                }
+            }
         }
     }
 
