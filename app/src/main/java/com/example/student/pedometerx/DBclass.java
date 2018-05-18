@@ -58,39 +58,39 @@ public class DBclass extends SQLiteOpenHelper {
         db.execSQL(strSQL);
         db.close();
     }
-    public void updatestatus(String status){
+    public void updatestatus(String status,String date){
         SQLiteDatabase db = this.getReadableDatabase();
-        String strSQL = "UPDATE DAILYRECORD SET STATUS = '"+status+"'";
+        String strSQL = "UPDATE DAILYRECORD SET STATUS = '"+status+"' WHERE DATE ='"+ date +"'";
         db.execSQL(strSQL);
         db.close();
     }
-    public void updatesteps(long steps){
+    public void updatesteps(long steps, String date){
         SQLiteDatabase db = this.getReadableDatabase();
-        String strSQL = "UPDATE DAILYRECORD SET STEPS = '"+steps+"'";
+        String strSQL = "UPDATE DAILYRECORD SET STEPS = '"+steps+"'WHERE DATE ='"+ date +"'";
         db.execSQL(strSQL);
         db.close();
     }
-    public void updateDistanceSpeedCalBurned(double distance, double speed, double calburned){
+    public void updateReset(long steps, double distance, double speed, double calburned, long time, String status, String Date){
         SQLiteDatabase db = this.getReadableDatabase();
-        String strSQL = "UPDATE DAILYRECORD SET DISTANCE = '"+distance+"', SPEED = '"+speed+"', CALBURNED = '"+calburned+"'";
+        String strSQL = "UPDATE DAILYRECORD SET STEPS='"+steps +"', DISTANCE = '"+distance+"', SPEED = '"+speed+"', STATUS ='"+status+"',CALBURNED = '"+calburned+"',TIME='"+time+"' WHERE DATE ='"+Date+"'";
         db.execSQL(strSQL);
         db.close();
     }
-    public void updatedistance(double distance){
+    public void updatedistance(double distance, String date){
         SQLiteDatabase db = this.getReadableDatabase();
-        String strSQL = "UPDATE DAILYRECORD SET DISTANCE = '"+distance+"'";
+        String strSQL = "UPDATE DAILYRECORD SET DISTANCE = '"+distance+"' WHERE DATE ='"+ date +"'";
         db.execSQL(strSQL);
         db.close();
     }
-    public void updatedspeed(double speed){
+    public void updatedspeed(double speed, String date){
         SQLiteDatabase db = this.getReadableDatabase();
-        String strSQL = "UPDATE DAILYRECORD SET SPEED = '"+speed+"'";
+        String strSQL = "UPDATE DAILYRECORD SET SPEED = '"+speed+"'WHERE DATE ='"+ date +"'";
         db.execSQL(strSQL);
         db.close();
     }
-    public void updatetime(long time){
+    public void updatetime(long time, String date){
         SQLiteDatabase db = this.getReadableDatabase();
-        String strSQL = "UPDATE DAILYRECORD SET TIME ='"+time+"'";
+        String strSQL = "UPDATE DAILYRECORD SET TIME ='"+time+"'WHERE DATE ='"+ date +"'";
         db.execSQL(strSQL);
         db.close();
     }
@@ -106,15 +106,15 @@ public class DBclass extends SQLiteOpenHelper {
         db.execSQL(strSQL);
         db.close();
     }
-    public void updategoal(long goal){
+    public void updategoal(long goal, String date){
         SQLiteDatabase db = this.getReadableDatabase();
-        String strSQL = "UPDATE DAILYRECORD SET STEPGOAL ='"+goal+"'";
+        String strSQL = "UPDATE DAILYRECORD SET STEPGOAL ='"+goal+"'WHERE DATE ='"+ date +"' ";
         db.execSQL(strSQL);
         db.close();
     }
-    public void updatecalburned(double calburned){
+    public void updatecalburned(double calburned, String date){
         SQLiteDatabase db = this.getReadableDatabase();
-        String strSQL = "UPDATE DAILYRECORD SET CALBURNED ='"+calburned+"'";
+        String strSQL = "UPDATE DAILYRECORD SET CALBURNED ='"+calburned+"' WHERE DATE ='"+ date +"'";
         db.execSQL(strSQL);
         db.close();
     }
@@ -136,11 +136,11 @@ public class DBclass extends SQLiteOpenHelper {
         db.execSQL(strSQL);
         db.close();
     }
-//    public void deleteStudent(String nameid){
-//        SQLiteDatabase db = this.getWritableDatabase();
-//        db.execSQL("DELETE FROM students WHERE NAME= '"+nameid+"'");
-//        db.close();
-//    }
+    public void deleteAchievement(int id){
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.execSQL("DELETE FROM ACHIEVEMENT WHERE ID = '"+id+"'");
+        db.close();
+    }
     public ArrayList<dailyrecord> selectDailyrecords() {
         ArrayList<dailyrecord> result = new ArrayList<dailyrecord>();
         SQLiteDatabase db = getReadableDatabase();

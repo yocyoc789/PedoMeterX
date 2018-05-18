@@ -50,7 +50,7 @@
 
             <Spinner
                 android:id="@+id/spinnertype"
-                android:layout_width="233dp"
+                android:layout_width="197dp"
                 android:layout_height="39dp"
                 android:layout_marginBottom="8dp"
                 android:layout_marginEnd="8dp"
@@ -99,7 +99,7 @@
 
             <TextView
                 android:id="@+id/textView3"
-                android:layout_width="2dp"
+                android:layout_width="47dp"
                 android:layout_height="42dp"
                 android:layout_centerHorizontal="true"
                 android:layout_marginLeft="4dp"
@@ -111,7 +111,7 @@
 
             <Spinner
                 android:id="@+id/spinnersets"
-                android:layout_width="36dp"
+                android:layout_width="110dp"
                 android:layout_height="39dp"
                 android:layout_marginBottom="8dp"
                 android:layout_marginEnd="8dp"

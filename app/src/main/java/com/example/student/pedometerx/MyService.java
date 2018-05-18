@@ -84,7 +84,7 @@ public class MyService extends Service implements SensorEventListener, StepListe
                 ArrayList<dailyrecord> dr = db.selectDailyrecords();
                 if(dr.get(dr.size()-1).status.equals("play")){
                     long ctime = dr.get(dr.size()-1).time+1;
-                    db.updatetime(ctime);
+                    db.updatetime(ctime,MainActivity.getdatetod());
                     String hms=String.format("%02d:%02d:%02d", ctime / 3600,
                             (ctime % 3600) / 60, (ctime % 60));
                     HomeFragment.calculatetime(hms);
@@ -126,7 +126,7 @@ public class MyService extends Service implements SensorEventListener, StepListe
     public void step(long timeNs) {
         HomeFragment.updatechart();
         ArrayList<dailyrecord> dr = db.selectDailyrecords();
-        db.updatesteps(dr.get(dr.size()-1).steps + 1);
+        db.updatesteps(dr.get(dr.size()-1).steps + 1,MainActivity.getdatetod());
         String cursteps =dr.get(dr.size()-1).steps+"";
         HomeFragment.setText(cursteps+"");
         HomeFragment.calcldistance(Double.parseDouble(cursteps),this);
@@ -146,10 +146,12 @@ public class MyService extends Service implements SensorEventListener, StepListe
 
         Spannable sb = new SpannableString("Steps Today");
         sb.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), 0, 11, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        DBclass dbl= new DBclass(this);
+        ArrayList<dailyrecord> dr = dbl.selectDailyrecords();
 
         builder= new Notification.Builder(context)
                 .setContentTitle("Steps Today")
-                .setContentText(""+MainActivity.stepz)
+                .setContentText(dr.get(dr.size()-1).steps+"")
                 .setContentIntent(pendingIntent)
                 //.setDefaults(Notification.DEFAULT_SOUND)
                 .setAutoCancel(false)

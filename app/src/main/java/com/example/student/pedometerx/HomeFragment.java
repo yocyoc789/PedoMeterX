@@ -46,7 +46,6 @@ public class HomeFragment extends Fragment{
     @Nullable
 
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        //return inflater.inflate(R.layout.fragment_home,container,false);
         View v = inflater.inflate(R.layout.fragment_home, container, false);
         db = new DBclass(getActivity());
         TvSteps=(TextView)v.findViewById(R.id.tv_steps);
@@ -62,21 +61,18 @@ public class HomeFragment extends Fragment{
         txtstepgoal=(TextView)v.findViewById(R.id.txtstepgoal);
 
 
-
         ArrayList<dailyrecord> dr = db.selectDailyrecords();
         if (dr.size() == 0){
             db.adddailyrecord(MainActivity.getdatetod(),0,10000,0.0,0.0,0.0,"pause",0);
             db.adduserinfo(50.0, 2.5);
         }
+
         //verify if another day
         MainActivity.newday();
 
         ArrayList<Userinfo> ui = db.selectUserInfo();
-        Toast.makeText(getActivity(), ui.get(ui.size()-1).stepdis+"", Toast.LENGTH_SHORT).show();
         dr = db.selectDailyrecords();
         curstatus = dr.get(dr.size()-1).status;
-        Toast.makeText(getActivity(),dr.size()+" "+curstatus,Toast.LENGTH_LONG).show();
-
         //add data to current
 
 
@@ -111,13 +107,13 @@ public class HomeFragment extends Fragment{
                 curstatus = dr.get(dr.size()-1).status;
                 if (curstatus.equals("play")){
                     btnplaypause.setBackground(getActivity().getResources().getDrawable(R.drawable.ic_play_arrow_black_24dp));
-                    db.updatestatus("pause");
+                    db.updatestatus("pause",MainActivity.getdatetod());
                     getActivity().stopService(new Intent(getActivity(), MyService.class));
 
                 }
                 else{
                     btnplaypause.setBackground(getActivity().getResources().getDrawable(R.drawable.ic_pause_black_24dp));
-                    db.updatestatus("play");
+                    db.updatestatus("play",MainActivity.getdatetod());
                     getActivity().startService(new Intent(getActivity(), MyService.class));
 
                 }
@@ -127,7 +123,7 @@ public class HomeFragment extends Fragment{
         });
         return v;
     }
-    public boolean isMyServiceRunning(Class<?> serviceClass,Context c) {
+    public static boolean isMyServiceRunning(Class<?> serviceClass, Context c) {
         ActivityManager manager = (ActivityManager) c.getSystemService(Context.ACTIVITY_SERVICE);
         for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
             if (serviceClass.getName().equals(service.service.getClassName())) {
@@ -148,19 +144,19 @@ public class HomeFragment extends Fragment{
         public static void updatechart() {
             if (TvSteps != null) {
                 ArrayList<dailyrecord> dr = db.selectDailyrecords();
+                if(dr.get(dr.size()-1).steps < dr.get(dr.size()-1).stepsgoal)
                 mPieChart.addPieSlice(new PieModel("Empty", dr.get(dr.size()-1).stepsgoal - dr.get(dr.size() - 1).steps, Color.parseColor("#A9A9A9")));
                 mPieChart.addPieSlice(new PieModel("Achieved", dr.get(dr.size() - 1).steps, Color.parseColor("#56B7F1")));
                  }
         }
-
         public static void calcldistance(double distance,Context context){
             DBclass dbl = new DBclass(context);
             ArrayList<dailyrecord> dr = dbl.selectDailyrecords();
             ArrayList<Userinfo> ui = dbl.selectUserInfo();
             double converttomiles = ui.get(ui.size()-1).stepdis * 0.00018939;
             distance = dr.get(dr.size()-1).steps * converttomiles;
-            String rounded = String.format("%.6f",distance).replaceAll("0*$","");
-            dbl.updatedistance(Double.parseDouble(rounded));
+            String rounded = String.format("%.3f",distance).replaceAll("0*$","");
+            dbl.updatedistance(Double.parseDouble(rounded),MainActivity.getdatetod());
             if(tvdistance!=null){
                 tvdistance.setText(rounded+" mile");
             }
@@ -170,8 +166,8 @@ public class HomeFragment extends Fragment{
             DBclass dbl = new DBclass(context);
             ArrayList<dailyrecord> dr = dbl.selectDailyrecords();
             Double speed = getdistance/dr.get(dr.size()-1).time*(3600);
-            String rounded = String.format("%.6f",speed).replaceAll("0*$","");
-            dbl.updatedspeed(Double.parseDouble(rounded));
+            String rounded = String.format("%.3f",speed).replaceAll("0*$","");
+            dbl.updatedspeed(Double.parseDouble(rounded),MainActivity.getdatetod());
             if(tvspeed!=null){
                 tvspeed.setText(rounded +" mile/h");
             }
@@ -188,7 +184,7 @@ public class HomeFragment extends Fragment{
             double kgtopounds = ui.get(ui.size()-1).weight * 2.20462262;
             double calburned = dr.get(dr.size()-1).distances * kgtopounds;
             String rounded = String.format("%.2f",calburned).replaceAll("0*$","");
-            dbl.updatecalburned(Double.parseDouble(rounded));
+            dbl.updatecalburned(Double.parseDouble(rounded),MainActivity.getdatetod());
             if (tvcalburned!=null){
                 tvcalburned.setText(rounded+ " kcal");
             }
@@ -197,32 +193,33 @@ public class HomeFragment extends Fragment{
         DBclass db = new DBclass(context);
         ArrayList<dailyrecord> dr = db.selectDailyrecords();
         ArrayList<Achievement> am = db.selectAchievement();
-        for(int i=0;i<dr.size();i++){
+        for(int i=0;i<am.size();i++){
+
             if (!am.get(i).status.equals("finished")){
                 if(am.get(i).stattoday.equals("no")){
                     if(am.get(i).type.equals("Distance")){
-                        if(dr.get(dr.size()-1).distances <= am.get(i).total){
+                        if(dr.get(dr.size()-1).distances >= am.get(i).total){
                             db.updateAchievementstattoday("yes",am.get(i).id);
                             db.updateSetsAchieved(am.get(i).setsachieved+1,am.get(i).id);
-                            if(am.get(i).setsachieved == am.get(i).sets){
+                            if(am.get(i).setsachieved+1 == am.get(i).sets){
                                 db.updateAchievementstatus("finished",am.get(i).id);
                             }
                         }
                     }
                     else if(am.get(i).type.equals("Speed")){
-                        if(dr.get(dr.size()-1).speeds <= am.get(i).total){
+                        if(dr.get(dr.size()-1).speeds >= am.get(i).total){
                             db.updateAchievementstattoday("yes",am.get(i).id);
                             db.updateSetsAchieved(am.get(i).setsachieved+1,am.get(i).id);
-                            if(am.get(i).setsachieved == am.get(i).sets){
+                            if(am.get(i).setsachieved+1 == am.get(i).sets){
                                 db.updateAchievementstatus("finished",am.get(i).id);
                             }
                         }
                     }
                     else{
-                        if(dr.get(dr.size()-1).calburned <= am.get(i).total){
+                        if(dr.get(dr.size()-1).calburned >= am.get(i).total){
                             db.updateAchievementstattoday("yes",am.get(i).id);
                             db.updateSetsAchieved(am.get(i).setsachieved+1,am.get(i).id);
-                            if(am.get(i).setsachieved == am.get(i).sets){
+                            if(am.get(i).setsachieved+1 == am.get(i).sets){
                                 db.updateAchievementstatus("finished",am.get(i).id);
                             }
                         }
@@ -230,5 +227,6 @@ public class HomeFragment extends Fragment{
                 }
             }
         }
+
     }
 }

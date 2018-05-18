@@ -19,6 +19,11 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.github.mikephil.charting.data.BarData;
+import com.github.mikephil.charting.data.ChartData;
+
+import org.eazegraph.lib.charts.BarChart;
+
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -86,6 +91,15 @@ public class MainActivity extends AppCompatActivity  {
         String datet = dateFormat.format(tomorrow);
         return datet;
     }
+    public static String getdateyes(){
+        GregorianCalendar gc = new GregorianCalendar();
+        DateFormat dateFormat = new SimpleDateFormat("dd-MMM-yyyy");
+        gc.add(Calendar.DATE, -1);
+        Date tomorrow = gc.getTime();
+        String datet = dateFormat.format(tomorrow);
+        return datet;
+    }
+
     public static void newday(){
         ArrayList<dailyrecord> dr = db.selectDailyrecords();
         ArrayList<Achievement> am = db.selectAchievement();
@@ -101,6 +115,11 @@ public class MainActivity extends AppCompatActivity  {
         }
     }
 
-
-
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        if(GraphFragment.chkifvisible()){
+            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,new GraphFragment()).commit();
+        }
+    }
 }

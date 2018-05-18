@@ -13,6 +13,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Set;
 import java.util.zip.Inflater;
 
 public class addAchievementDialog extends AppCompatDialogFragment {
@@ -82,3 +83,4 @@ public class addAchievementDialog extends AppCompatDialogFragment {
     return builder.create();
         }
     }
+

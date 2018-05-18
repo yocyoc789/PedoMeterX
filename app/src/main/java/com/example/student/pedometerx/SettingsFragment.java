@@ -2,6 +2,8 @@ package com.example.student.pedometerx;
 
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -19,6 +21,8 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.w3c.dom.Text;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,15 +31,14 @@ import at.markushi.ui.CircleButton;
 public class SettingsFragment extends Fragment {
     AlertDialog.Builder builder;
     CircleButton btnaddnewA;
-    Button btnweight;
+    Button btnweight, btnreset ;
     Spinner spinnergoal, spinnerstepdis;
     static TextView tvweight;
     ListView listView;
+    static String aord; //add or delete identifier
+    static int Aid;
     public DBclass db;
 
-    int[] IMAGES = {R.drawable.ic_pause_black_24dp,R.drawable.ic_pause_black_24dp,R.drawable.ic_pause_black_24dp,R.drawable.ic_pause_black_24dp,R.drawable.ic_pause_black_24dp};
-    String[] NAMES = {"Add black","Equalizer black","GPS qwerty","asdasdas","sadasdas"};
-    String[] Description = {"asd1","asd2","asd3","asd4","asd5"};
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -46,6 +49,7 @@ public class SettingsFragment extends Fragment {
         spinnergoal = (Spinner)v.findViewById(R.id.spinnergoal);
         spinnerstepdis = (Spinner)v.findViewById(R.id.spinnersteplen);
         tvweight = (TextView)v.findViewById(R.id.txtweight);
+        btnreset = (Button)v.findViewById(R.id.btnreset);
 
         //Set text for goal and user info
         ArrayList<Userinfo> ui = db.selectUserInfo();
@@ -89,14 +93,44 @@ public class SettingsFragment extends Fragment {
             }
         });
 
-
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        btnreset.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                String selected = ((TextView) view.findViewById(R.id.txttitle)).getText().toString();
+            public void onClick(View view) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                builder.setTitle("Confirm");
+                builder.setMessage("Are you sure?");
+                builder.setPositiveButton("YES", new DialogInterface.OnClickListener() {
 
-                Toast toast = Toast.makeText(getActivity(), selected, Toast.LENGTH_SHORT);
-                toast.show();
+                    public void onClick(DialogInterface dialog, int which) {
+                        db.updateReset(0,0.0,0.0,0.0,0,"pause",MainActivity.getdatetod());
+                        if(HomeFragment.isMyServiceRunning(MyService.class,getActivity())){
+                            getActivity().stopService(new Intent(getActivity(), MyService.class));
+                        }
+                        Toast.makeText(getActivity(),"All Values Today are reset to zero",Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+                builder.setNegativeButton("NO", new DialogInterface.OnClickListener() {
+
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+
+                AlertDialog alert = builder.create();
+                alert.show();
+
+            }
+        });
+
+        listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
+                String selected = ((TextView) view.findViewById(R.id.txtid)).getText().toString();
+                Aid = Integer.parseInt(selected);
+                deleteAch();
+                return true;
             }
         });
         btnweight.setOnClickListener(new View.OnClickListener() {
@@ -114,7 +148,7 @@ public class SettingsFragment extends Fragment {
         spinnergoal.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                db.updategoal(Integer.parseInt((String) spinnergoal.getSelectedItem()));
+                db.updategoal(Integer.parseInt((String) spinnergoal.getSelectedItem()),MainActivity.getdatetod());
             }
 
             @Override
@@ -139,6 +173,8 @@ public class SettingsFragment extends Fragment {
 
         return v;
     }
+
+
     class CustomAdapter extends BaseAdapter {
         DBclass db = new DBclass(getActivity());
         ArrayList<Achievement> am = db.selectAchievement();
@@ -170,9 +206,29 @@ public class SettingsFragment extends Fragment {
             TextView txttotaltype = (TextView) v.findViewById(R.id.txttypetotal);
             TextView txtsets = (TextView) v.findViewById(R.id.txtsets);
             TextView txtid = (TextView)v.findViewById(R.id.txtid);
+            TextView txtstatus = (TextView)v.findViewById(R.id.txtstatus);
 //asd
             String getdattod = "Created on "+am.get(i).datecreated;
             if(am.get(i).status.equals("unfinished")){
+                if(am.get(i).type.equals("Speed")){
+                    img1.setImageResource(R.drawable.speed);
+                    txttotaltype.setText("Speed up to "+am.get(i).total+" mile/h\n"+getdattod);
+                }
+                else if(am.get(i).type.equals("Distance")){
+                    img1.setImageResource(R.drawable.distance);
+                    txttotaltype.setText("Reach "+am.get(i).total+" miles\n"+getdattod);
+                }
+                else{
+                    img1.setImageResource(R.drawable.calory);
+                    txttotaltype.setText("Burn "+am.get(i).total+" calories\n"+getdattod);
+                }
+                txttitle.setText(am.get(i).title);
+                txtsets.setText(am.get(i).setsachieved+"/"+am.get(i).sets);
+                txtid.setText(am.get(i).id+"");
+            }
+            else{
+                txtstatus.setText("Finished");
+                Toast.makeText(getActivity(),"asdasd",Toast.LENGTH_SHORT).show();
                 if(am.get(i).type.equals("Speed")){
                     img1.setImageResource(R.drawable.speed);
                     txttotaltype.setText("Speed up to "+am.get(i).total+" mile/h\n"+getdattod);
@@ -205,6 +261,10 @@ public class SettingsFragment extends Fragment {
     public void addWeight(){
         addWeightDialog addw = new addWeightDialog();
         addw.show(getFragmentManager(),"Add Dialog");
+    }
+    public void deleteAch(){
+        DeleteAchievementDialog del = new DeleteAchievementDialog();
+        del.show(getFragmentManager(),"Delete Achievement");
     }
 
 }
